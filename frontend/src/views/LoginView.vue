@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import loginIllustration from '../assets/illustrations/login.svg'
+import logoColor from '../assets/branding/logo-color.svg'
 
 const email = ref('')
 const senha = ref('')
@@ -36,13 +37,9 @@ async function handleSubmit() {
       <div class="w-full max-w-sm">
 
         <!-- Marca -->
-        <div class="flex items-center gap-2 mb-10">
-          <div class="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-            <span class="text-white text-sm font-bold">N</span>
-          </div>
-          <span class="text-sm font-semibold text-ink dark:text-ink-dark tracking-tight">NexMeet</span>
+        <div class="flex justify-center -mb-8">
+          <img :src="logoColor" alt="NexMeet" class="h-64 w-auto object-contain" />
         </div>
-
         <!-- Cabeçalho do Login -->
         <div class="mb-8">
           <h1 class="text-3xl font-extrabold text-ink dark:text-ink-dark tracking-tight mb-2">Faça seu login</h1>
