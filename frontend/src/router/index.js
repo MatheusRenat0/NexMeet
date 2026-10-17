@@ -1,19 +1,29 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import LoginView from '../views/LoginView.vue'
-import HomeView from '../views/HomeView.vue'
+import AppLayout from '../components/AppLayout.vue'
+import DashboardView from '../views/DashboardView.vue'
+import SalasView from '../views/SalasView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/login', name: 'login', component: LoginView },
-    { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true } },
+    {
+      path: '/',
+      component: AppLayout,
+      meta: { requiresAuth: true },
+      children: [
+        { path: '', name: 'home', component: DashboardView },
+        { path: 'salas', name: 'salas', component: SalasView },
+      ],
+    },
   ],
 })
 
 router.beforeEach((to) => {
   const auth = useAuthStore()
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+  if (to.matched.some((r) => r.meta.requiresAuth) && !auth.isAuthenticated) {
     return { name: 'login' }
   }
 })
