@@ -29,3 +29,26 @@ export const rankingSalas = [
   { nome: 'Sala Horizonte', reservas: 19 },
   { nome: 'Sala Cedro', reservas: 11 },
 ]
+
+// ---- Reservas e usuários simulados (em memória; reiniciam ao recarregar a página) ----
+export function formatarData(d) {
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${mm}-${dd}`
+}
+
+function emDias(offset) {
+  const d = new Date()
+  d.setDate(d.getDate() + offset)
+  return formatarData(d)
+}
+
+export const reservas = [
+  { id: 1, titulo: 'Planejamento semanal', salaId: 1, data: emDias(0), inicio: '09:00', fim: '10:00', responsavel: 'Ana Souza', status: 'confirmada' },
+  { id: 2, titulo: 'Demo para cliente', salaId: 3, data: emDias(0), inicio: '10:30', fim: '12:00', responsavel: 'Carlos Lima', status: 'confirmada' },
+  { id: 3, titulo: 'Treinamento de onboarding', salaId: 6, data: emDias(0), inicio: '15:30', fim: '17:30', responsavel: 'Paulo Reis', status: 'pendente' },
+  { id: 4, titulo: 'Entrevista técnica', salaId: 4, data: emDias(1), inicio: '14:00', fim: '15:00', responsavel: 'Marina Alves', status: 'confirmada' },
+  { id: 5, titulo: 'Reunião de diretoria', salaId: 2, data: emDias(2), inicio: '08:30', fim: '10:00', responsavel: 'Helena Prado', status: 'pendente' },
+  { id: 6, titulo: 'Workshop de design', salaId: 3, data: emDias(4), inicio: '13:00', fim: '17:00', responsavel: 'Rafael Costa', status: 'confirmada' },
+  { id: 7, titulo: 'Retrospectiva da sprint', salaId: 1, data: emDias(-3), inicio: '16:00', fim: '17:00', responsavel: 'Ana Souza', status: 'confirmada' },
+]

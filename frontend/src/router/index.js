@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import AppLayout from '../components/AppLayout.vue'
 import DashboardView from '../views/DashboardView.vue'
 import SalasView from '../views/SalasView.vue'
+import CalendarioView from '../views/CalendarioView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -15,6 +16,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
       children: [
         { path: '', name: 'home', component: DashboardView },
+        { path: 'calendario', name: 'calendario', component: CalendarioView },
         { path: 'salas', name: 'salas', component: SalasView },
       ],
     },

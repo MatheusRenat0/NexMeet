@@ -24,6 +24,11 @@ const secoes = [
     titulo: 'Reservas',
     itens: [
       {
+        to: '/calendario',
+        label: 'Calendário',
+        icone: ['M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', 'M16 2v4', 'M8 2v4', 'M3 10h18'],
+      },
+      {
         to: '/salas',
         label: 'Salas',
         icone: ['M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16', 'M15 9h4a1 1 0 0 1 1 1v11', 'M2 21h20', 'M8 9h3', 'M8 13h3'],

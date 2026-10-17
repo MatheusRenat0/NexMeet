@@ -17,6 +17,7 @@ async function montar() {
     routes: [
       { path: '/', component: { template: '<div>dash</div>' } },
       { path: '/salas', component: { template: '<div>salas</div>' } },
+      { path: '/calendario', component: { template: '<div>calendario</div>' } },
       { path: '/login', name: 'login', component: { template: '<div>login</div>' } },
     ],
   })
@@ -46,7 +47,7 @@ describe('AppLayout', () => {
 
   it('navega ao clicar em um item do menu', async () => {
     const { wrapper, router } = await montar()
-    await wrapper.findAll('nav a')[1].trigger('click')
+    await wrapper.findAll('nav a').find((a) => a.text() === 'Salas').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.path).toBe('/salas')
   })
