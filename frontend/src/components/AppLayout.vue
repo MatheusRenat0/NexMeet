@@ -1,18 +1,58 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import logoMono from '../assets/branding/logo-mono.svg'
+import { useUiStore } from '../stores/ui'
+import iconApp from '../assets/branding/icon-app.svg'
 
 const auth = useAuthStore()
+const ui = useUiStore()
 const router = useRouter()
-const menuAberto = ref(false)
+
+const drawerAberto = ref(false)
+const dropdownAberto = ref(null) // 'notif' | 'help' | 'user' | null
 
 // Filtro por perfil depende do perfil no JWT (F-01); por ora todos os itens implementados aparecem.
-const itensMenu = [
-  { to: '/', label: 'Dashboard', icone: 'M3 12 12 3l9 9M5 10v10h5v-6h4v6h5V10' },
-  { to: '/salas', label: 'Salas', icone: 'M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16M15 9h4a1 1 0 0 1 1 1v11M2 21h20M8 9h3M8 13h3' },
+const secoes = [
+  {
+    titulo: null,
+    itens: [
+      { to: '/', label: 'Início', icone: ['M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'] },
+    ],
+  },
+  {
+    titulo: 'Reservas',
+    itens: [
+      {
+        to: '/salas',
+        label: 'Salas',
+        icone: ['M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16', 'M15 9h4a1 1 0 0 1 1 1v11', 'M2 21h20', 'M8 9h3', 'M8 13h3'],
+      },
+    ],
+  },
 ]
+
+const nome = computed(() => auth.email || 'Usuário')
+const iniciais = computed(() => nome.value.replace(/[^a-zA-Z]/g, '').slice(0, 2) || '?')
+
+function alternarMenu() {
+  if (window.innerWidth > 992) {
+    ui.toggleSidebarCollapsed()
+  } else {
+    drawerAberto.value = !drawerAberto.value
+  }
+}
+
+function alternarDropdown(nomeDropdown) {
+  dropdownAberto.value = dropdownAberto.value === nomeDropdown ? null : nomeDropdown
+}
+
+function fecharDropdowns(event) {
+  if (!event.target.closest('.nm-dropdown')) dropdownAberto.value = null
+}
+
+onMounted(() => document.addEventListener('click', fecharDropdowns))
+onBeforeUnmount(() => document.removeEventListener('click', fecharDropdowns))
 
 function sair() {
   auth.logout()
@@ -21,86 +61,126 @@ function sair() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface dark:bg-surface-dark md:flex">
-    <!-- Fundo escurecido do drawer (mobile) -->
-    <div
-      v-if="menuAberto"
-      class="fixed inset-0 bg-ink/50 z-30 md:hidden"
-      @click="menuAberto = false"
-    ></div>
+  <div>
+    <div class="sidebar-overlay" :class="{ active: drawerAberto }" data-testid="overlay" @click="drawerAberto = false"></div>
 
-    <!-- Menu lateral -->
-    <aside
-      data-testid="sidebar"
-      class="fixed inset-y-0 left-0 z-40 w-64 bg-primary text-white flex flex-col transition-transform duration-200 md:static md:translate-x-0"
-      :class="menuAberto ? 'translate-x-0' : '-translate-x-full'"
-    >
-      <div class="px-6 py-5 flex items-center gap-3 border-b border-white/10">
-        <img :src="logoMono" alt="NexMeet" class="h-9 w-auto" />
-      </div>
+    <div class="mbx-layout" :class="{ collapsed: ui.sidebarCollapsed }" data-testid="layout">
+      <!-- SIDEBAR -->
+      <aside class="mbx-sidebar" :class="{ active: drawerAberto }" data-testid="sidebar">
+        <div class="sidebar-logo">
+          <img :src="iconApp" alt="NexMeet" />
+          <span>NexMeet</span>
+        </div>
 
-      <nav class="flex-1 px-3 py-4 space-y-1" aria-label="Navegação principal">
-        <RouterLink
-          v-for="item in itensMenu"
-          :key="item.to"
-          :to="item.to"
-          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white transition-colors"
-          active-class="!bg-white/15 !text-white"
-          exact-active-class="!bg-white/15 !text-white"
-          @click="menuAberto = false"
-        >
-          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path :d="item.icone" />
-          </svg>
-          {{ item.label }}
-        </RouterLink>
-      </nav>
+        <nav class="sidebar-nav" aria-label="Navegação principal">
+          <template v-for="(secao, i) in secoes" :key="i">
+            <div v-if="secao.titulo" class="sidebar-section-title">{{ secao.titulo }}</div>
+            <RouterLink
+              v-for="item in secao.itens"
+              :key="item.to"
+              :to="item.to"
+              class="sidebar-item"
+              :title="item.label"
+              @click="drawerAberto = false"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path v-for="d in item.icone" :key="d" :d="d" />
+              </svg>
+              <span>{{ item.label }}</span>
+            </RouterLink>
+          </template>
+        </nav>
+      </aside>
 
-      <div class="px-3 py-4 border-t border-white/10">
-        <button
-          class="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white transition-colors"
-          @click="sair"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-          </svg>
-          Sair
-        </button>
-      </div>
-    </aside>
-
-    <div class="flex-1 min-w-0 flex flex-col">
-      <!-- Topo -->
-      <header class="h-16 bg-white dark:bg-ink border-b border-ink/10 flex items-center justify-between px-4 md:px-8">
-        <button
-          class="md:hidden p-2 -ml-2 text-ink dark:text-ink-dark"
-          aria-label="Abrir menu"
-          @click="menuAberto = true"
-        >
-          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <span class="hidden md:block"></span>
-
-        <div class="flex items-center gap-4">
-          <button class="relative p-2 text-ink/60 dark:text-ink-dark/60 hover:text-ink dark:hover:text-ink-dark transition-colors" aria-label="Notificações">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0" />
+      <!-- ÁREA DIREITA -->
+      <div class="mbx-content-area">
+        <header class="mbx-navbar">
+          <button class="navbar-toggle-btn" title="Alternar menu" aria-label="Alternar menu" @click="alternarMenu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px" aria-hidden="true">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <div class="flex items-center gap-2">
-            <span class="w-8 h-8 rounded-full bg-secondary/20 text-primary font-semibold text-sm flex items-center justify-center uppercase">
-              {{ (auth.email || '?').charAt(0) }}
-            </span>
-            <span class="hidden sm:block text-sm text-ink dark:text-ink-dark" data-testid="usuario-logado">{{ auth.email || 'Usuário' }}</span>
-          </div>
-        </div>
-      </header>
 
-      <main class="flex-1 p-4 md:p-8">
-        <RouterView />
-      </main>
+          <div class="navbar-actions">
+            <!-- Notificações -->
+            <div class="nm-dropdown">
+              <button class="nav-icon-btn" title="Notificações" aria-label="Notificações" @click.stop="alternarDropdown('notif')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </button>
+              <div class="nm-dropdown-menu" :class="{ active: dropdownAberto === 'notif' }" data-testid="menu-notif" @click.stop>
+                <div class="notif-header">Notificações</div>
+                <div class="notif-empty">Você não tem novas notificações.</div>
+              </div>
+            </div>
+
+            <!-- Ajuda -->
+            <div class="nm-dropdown">
+              <button class="nav-icon-btn" title="Central de ajuda" aria-label="Central de ajuda" @click.stop="alternarDropdown('help')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </button>
+              <div class="nm-dropdown-menu" :class="{ active: dropdownAberto === 'help' }" data-testid="menu-help" @click.stop>
+                <div class="user-dropdown-header">
+                  <div class="user-info">
+                    <div class="user-name" style="font-size: 1.05rem">Central de Ajuda</div>
+                    <div class="user-sub">Dúvidas frequentes e materiais de treinamento estarão disponíveis em breve.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Usuário -->
+            <div class="nm-dropdown user" style="margin-left: 5px">
+              <button class="user-avatar-btn" aria-label="Menu do usuário" data-testid="avatar" @click.stop="alternarDropdown('user')">
+                {{ iniciais }}
+              </button>
+              <div class="nm-dropdown-menu" :class="{ active: dropdownAberto === 'user' }" data-testid="menu-user" @click.stop>
+                <div class="user-dropdown-header">
+                  <div class="user-avatar-lg">{{ iniciais }}</div>
+                  <div class="user-info">
+                    <div class="user-name" :title="nome" data-testid="usuario-logado">{{ nome }}</div>
+                  </div>
+                </div>
+
+                <div class="dropdown-divider"></div>
+
+                <div class="dropdown-item" style="justify-content: space-between" role="switch" :aria-checked="ui.isDark" tabindex="0" data-testid="tema" @click="ui.setTheme(ui.isDark ? 'light' : 'dark')" @keydown.enter="ui.setTheme(ui.isDark ? 'light' : 'dark')">
+                  <div style="display: flex; align-items: center; gap: 14px">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+                    </svg>
+                    Modo Escuro
+                  </div>
+                  <span class="switch" :class="{ on: ui.isDark }"><span class="slider"></span></span>
+                </div>
+
+                <div class="dropdown-divider"></div>
+
+                <button class="dropdown-item" data-testid="sair" @click="sair">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Sair
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="mbx-main-card">
+          <RouterView />
+        </main>
+      </div>
     </div>
   </div>
 </template>

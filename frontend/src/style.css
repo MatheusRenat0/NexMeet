@@ -16,3 +16,119 @@
 body {
   font-family: var(--font-sans);
 }
+/* ============================================================
+   TEMA CLARO / ESCURO (padrão: escuro) — tokens globais
+   O atributo data-theme é definido em <html> pela store `ui`.
+   ============================================================ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root,
+[data-theme="light"] {
+  --bg-body: #f1f5f9;
+  --bg-panel: #ffffff;
+  --bg-hover: #f8fafc;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --accent: #0f4c5c;
+  --accent-soft: rgba(23, 195, 178, 0.16);
+}
+
+[data-theme="dark"] {
+  --bg-body: #111216;
+  --bg-panel: #1a1c23;
+  --bg-hover: #262933;
+  --border-color: #2b2e38;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #17c3b2;
+  --accent-soft: rgba(23, 195, 178, 0.14);
+}
+
+/* Expõe os tokens como utilitários Tailwind: bg-panel, text-fg, text-muted, border-line... */
+@theme inline {
+  --color-body: var(--bg-body);
+  --color-panel: var(--bg-panel);
+  --color-hover: var(--bg-hover);
+  --color-line: var(--border-color);
+  --color-fg: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+}
+
+/* ---------- Layout principal ---------- */
+.mbx-layout { display: flex; height: 100vh; width: 100vw; background: var(--bg-body); color: var(--text-primary); transition: background-color .3s ease, color .3s ease; }
+.mbx-sidebar, .mbx-main-card { transition: all .3s cubic-bezier(.25, 1, .5, 1); }
+
+.mbx-sidebar { width: 260px; background: var(--bg-body); display: flex; flex-direction: column; border-right: 1px solid var(--border-color); z-index: 1000; }
+.sidebar-logo { height: 70px; display: flex; align-items: center; padding: 0 24px; font-weight: 700; font-size: 1.1rem; color: var(--text-primary); gap: 12px; white-space: nowrap; overflow: hidden; }
+.sidebar-logo img { height: 32px; width: 32px; border-radius: 8px; flex-shrink: 0; }
+.sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 4px; }
+.sidebar-section-title { font-size: .7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: .05em; margin: 15px 0 5px 12px; white-space: nowrap; }
+.sidebar-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: .9rem; font-weight: 500; transition: all .2s; white-space: nowrap; background: none; border: 0; width: 100%; cursor: pointer; font-family: inherit; }
+.sidebar-item:hover, .sidebar-item.active, .sidebar-item.router-link-exact-active { background: var(--bg-hover); color: var(--text-primary); }
+.sidebar-item.router-link-exact-active svg { color: var(--accent); }
+.sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+@media (min-width: 993px) {
+  .mbx-layout.collapsed .mbx-sidebar { width: 76px; }
+  .mbx-layout.collapsed .sidebar-logo span,
+  .mbx-layout.collapsed .sidebar-item span,
+  .mbx-layout.collapsed .sidebar-section-title { display: none; }
+  .mbx-layout.collapsed .sidebar-logo { padding: 0; justify-content: center; }
+  .mbx-layout.collapsed .sidebar-nav { padding: 20px 8px; }
+  .mbx-layout.collapsed .sidebar-item { padding: 12px; justify-content: center; }
+}
+
+.mbx-content-area { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-body); }
+.mbx-navbar { height: 70px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
+.navbar-toggle-btn, .nav-icon-btn { background: none; border: 0; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.navbar-toggle-btn { padding: 6px; border-radius: 6px; }
+.nav-icon-btn { padding: 8px; border-radius: 50%; }
+.navbar-toggle-btn:hover, .nav-icon-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
+.nav-icon-btn svg { width: 20px; height: 20px; }
+.navbar-actions { display: flex; align-items: center; gap: 15px; }
+
+/* ---------- Dropdowns ---------- */
+.nm-dropdown { position: relative; display: flex; align-items: center; }
+.nm-dropdown-menu { position: absolute; top: calc(100% + 15px); right: -10px; width: 320px; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, .4); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all .2s; z-index: 1000; overflow: hidden; padding: 8px 0; }
+.nm-dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
+.nm-dropdown.user .nm-dropdown-menu { right: 0; }
+.notif-header { padding: 12px 20px 14px; font-weight: 600; color: var(--text-primary); border-bottom: 1px solid var(--border-color); font-size: .95rem; margin-top: -8px; padding-top: 16px; }
+.notif-empty { padding: 30px 20px; text-align: center; color: var(--text-secondary); font-size: .85rem; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.user-avatar-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--bg-hover); border: 1px solid var(--border-color); color: var(--text-primary); font-weight: 600; font-size: .95rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; text-transform: uppercase; }
+.user-avatar-btn:hover { background: var(--border-color); }
+.user-dropdown-header { display: flex; align-items: center; gap: 15px; padding: 16px 20px; }
+.user-avatar-lg { width: 46px; height: 46px; border-radius: 50%; background: var(--bg-hover); color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; border: 1px solid var(--border-color); text-transform: uppercase; }
+.user-info { display: flex; flex-direction: column; overflow: hidden; }
+.user-name { font-weight: 600; color: var(--text-primary); font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-sub { font-size: .8rem; color: var(--text-secondary); margin-top: 2px; }
+.dropdown-divider { height: 1px; background: var(--border-color); margin: 8px 0; }
+.dropdown-item { display: flex; align-items: center; gap: 14px; padding: 12px 20px; color: var(--text-secondary); text-decoration: none; font-size: .9rem; font-weight: 500; transition: all .2s; cursor: pointer; background: none; border: 0; width: 100%; font-family: inherit; text-align: left; }
+.dropdown-item svg { width: 18px; height: 18px; stroke: currentColor; flex-shrink: 0; }
+.dropdown-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* Toggle (modo escuro) */
+.switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+.switch .slider { position: absolute; inset: 0; background: #64748b; transition: .4s; border-radius: 34px; }
+.switch .slider::before { position: absolute; content: ""; height: 12px; width: 12px; left: 4px; bottom: 4px; background: #fff; transition: .4s; border-radius: 50%; }
+.switch.on .slider { background: var(--accent); }
+.switch.on .slider::before { transform: translateX(16px); }
+
+/* ---------- Card central arredondado ---------- */
+.mbx-main-card { flex: 1; background: var(--bg-panel); border-radius: 20px; margin: 0 20px 20px; padding: 30px; overflow-y: auto; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0, 0, 0, .1); }
+.mbx-main-card::-webkit-scrollbar, .sidebar-nav::-webkit-scrollbar { width: 6px; }
+.mbx-main-card::-webkit-scrollbar-thumb, .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .7); z-index: 999; opacity: 0; visibility: hidden; transition: all .3s; }
+.sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+@media (max-width: 992px) {
+  .mbx-sidebar { position: fixed; inset: 0 auto 0 0; width: 260px; transform: translateX(-100%); box-shadow: 5px 0 25px rgba(0, 0, 0, .5); }
+  .mbx-sidebar.active { transform: translateX(0); }
+  .mbx-navbar { padding: 0 20px; }
+  .mbx-main-card { margin: 0 10px 10px; padding: 15px; border-radius: 12px; }
+  .navbar-actions { gap: 8px; }
+  .nm-dropdown-menu { width: 280px; right: -5px; }
+}
