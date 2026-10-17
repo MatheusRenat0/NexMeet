@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises, RouterLinkStub } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import NovaReservaView from './NovaReservaView.vue'
+import DateField from '../components/DateField.vue'
+import TimeField from '../components/TimeField.vue'
 import { reservasService } from '../services'
 import { formatarData } from '../services/mockData'
 import { useAuthStore } from '../stores/auth'
@@ -31,9 +33,9 @@ async function montar() {
 async function preencher(w, v) {
   if (v.titulo !== undefined) await w.find('#titulo').setValue(v.titulo)
   if (v.sala !== undefined) await w.find('#sala').setValue(String(v.sala))
-  if (v.data !== undefined) await w.find('#data').setValue(v.data)
-  if (v.inicio !== undefined) await w.find('#inicio').setValue(v.inicio)
-  if (v.fim !== undefined) await w.find('#fim').setValue(v.fim)
+  if (v.data !== undefined) await w.findComponent(DateField).setValue(v.data)
+  if (v.inicio !== undefined) await w.findAllComponents(TimeField)[0].setValue(v.inicio)
+  if (v.fim !== undefined) await w.findAllComponents(TimeField)[1].setValue(v.fim)
   if (v.participantes !== undefined) await w.find('#participantes').setValue(String(v.participantes))
 }
 

@@ -1,6 +1,8 @@
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
+import DateField from '../components/DateField.vue'
+import TimeField from '../components/TimeField.vue'
 import { reservasService, salasService } from '../services'
 import { validarReserva, HORARIO_COMERCIAL } from '../services/reservas'
 import { formatarData } from '../services/mockData'
@@ -25,6 +27,16 @@ const form = reactive({
 })
 const erros = ref({})
 
+const hoje = formatarData(new Date())
+const mudar = (hhmm, delta) => {
+  const [h, m] = hhmm.split(':').map(Number)
+  const t = h * 60 + m + delta
+  return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`
+}
+// O início vai até 30 min antes do fim do expediente; o término começa 30 min após a abertura.
+const inicioAte = mudar(HORARIO_COMERCIAL.fim, -30)
+const fimDe = mudar(HORARIO_COMERCIAL.inicio, 30)
+
 onMounted(async () => {
   ;[salas.value, reservas.value] = await Promise.all([salasService.listar(), reservasService.listar()])
 })
@@ -39,6 +51,9 @@ function validar() {
 function aoAlterar() {
   if (enviado.value) validar()
 }
+
+// Os seletores personalizados emitem update:modelValue; revalida quando mudam.
+watch(() => [form.data, form.inicio, form.fim], aoAlterar)
 
 async function enviar() {
   enviado.value = true
@@ -93,16 +108,16 @@ const borda = (k) => (erros.value[k] ? 'border-alert' : 'border-line focus:borde
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label for="data" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Data</label>
-          <input id="data" v-model="form.data" type="date" :class="[campo, borda('data')]" @change="aoAlterar" />
+          <DateField id="data" v-model="form.data" :min="hoje" :invalid="!!erros.data" />
           <p v-if="erros.data" data-testid="erro-data" class="text-xs text-alert mt-1">{{ erros.data }}</p>
         </div>
         <div>
           <label for="inicio" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Início</label>
-          <input id="inicio" v-model="form.inicio" type="time" :class="[campo, borda('inicio')]" @change="aoAlterar" />
+          <TimeField id="inicio" v-model="form.inicio" :de="HORARIO_COMERCIAL.inicio" :ate="inicioAte" :invalid="!!erros.inicio" />
         </div>
         <div>
           <label for="fim" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Término</label>
-          <input id="fim" v-model="form.fim" type="time" :class="[campo, borda('fim')]" @change="aoAlterar" />
+          <TimeField id="fim" v-model="form.fim" :de="fimDe" :ate="HORARIO_COMERCIAL.fim" :invalid="!!erros.fim" />
         </div>
       </div>
       <p v-if="erros.inicio" data-testid="erro-inicio" class="text-xs text-alert -mt-3">{{ erros.inicio }}</p>
