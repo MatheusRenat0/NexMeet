@@ -19,6 +19,7 @@ async function montar() {
       { path: '/salas', component: { template: '<div>salas</div>' } },
       { path: '/calendario', component: { template: '<div>calendario</div>' } },
       { path: '/reservas/nova', component: { template: '<div>nova</div>' } },
+      { path: '/usuarios', component: { template: '<div>usuarios</div>' } },
       { path: '/login', name: 'login', component: { template: '<div>login</div>' } },
     ],
   })
