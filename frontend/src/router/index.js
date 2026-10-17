@@ -5,6 +5,7 @@ import AppLayout from '../components/AppLayout.vue'
 import DashboardView from '../views/DashboardView.vue'
 import SalasView from '../views/SalasView.vue'
 import CalendarioView from '../views/CalendarioView.vue'
+import NovaReservaView from '../views/NovaReservaView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -17,6 +18,7 @@ const router = createRouter({
       children: [
         { path: '', name: 'home', component: DashboardView },
         { path: 'calendario', name: 'calendario', component: CalendarioView },
+        { path: 'reservas/nova', name: 'nova-reserva', component: NovaReservaView },
         { path: 'salas', name: 'salas', component: SalasView },
       ],
     },

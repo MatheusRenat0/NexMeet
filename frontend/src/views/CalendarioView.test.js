@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount, flushPromises, RouterLinkStub } from '@vue/test-utils'
 import CalendarioView from './CalendarioView.vue'
 import { formatarData } from '../services/mockData'
 
 async function montar() {
-  const w = mount(CalendarioView)
+  const w = mount(CalendarioView, { global: { stubs: { RouterLink: RouterLinkStub } } })
   await flushPromises()
   return w
 }
@@ -44,5 +44,11 @@ describe('CalendarioView', () => {
     await w.findAll('button').find((b) => b.text() === 'Hoje').trigger('click')
     expect(w.find('[data-testid="mes-titulo"]').text()).toBe(inicial)
     expect(formatarData(new Date())).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  })
+
+  it('o botão Nova reserva leva a data selecionada', async () => {
+    const w = await montar()
+    const link = w.findComponent(RouterLinkStub)
+    expect(link.props('to')).toEqual({ path: '/reservas/nova', query: { data: formatarData(new Date()) } })
   })
 })

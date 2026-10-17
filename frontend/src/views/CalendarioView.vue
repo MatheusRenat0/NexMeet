@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { reservasService, salasService } from '../services'
 import { formatarData } from '../services/mockData'
 
@@ -57,6 +58,13 @@ function irParaHoje() {
   <section>
     <div class="flex flex-wrap items-center justify-between gap-3 mb-1">
       <h1 class="text-2xl font-bold font-[family-name:var(--font-heading)] text-fg">Calendário</h1>
+      <RouterLink
+        :to="{ path: '/reservas/nova', query: { data: selecionado } }"
+        data-testid="nova-reserva"
+        class="bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-lg px-4 py-2 transition-all"
+      >
+        Nova reserva
+      </RouterLink>
     </div>
     <p class="text-sm text-muted mb-2">Reservas de salas por dia.</p>
     <p class="text-xs text-muted mb-4">Dados de demonstração — a integração com a API vem nas próximas fases.</p>

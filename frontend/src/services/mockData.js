@@ -1,11 +1,11 @@
 // DADOS SIMULADOS — substituir pela API real quando os módulos de salas e reservas existirem (N-02, N-03).
 export const salas = [
   { id: 1, nome: 'Sala Aurora', andar: '1º andar', capacidade: 8, recursos: ['Projetor', 'Videoconferência', 'Quadro branco'], status: 'disponivel' },
-  { id: 2, nome: 'Sala Horizonte', andar: '1º andar', capacidade: 12, recursos: ['TV 65"', 'Videoconferência', 'Ar-condicionado'], status: 'ocupada' },
+  { id: 2, nome: 'Sala Horizonte', andar: '1º andar', capacidade: 12, executiva: true, recursos: ['TV 65"', 'Videoconferência', 'Ar-condicionado'], status: 'ocupada' },
   { id: 3, nome: 'Sala Atlântico', andar: '2º andar', capacidade: 20, recursos: ['Projetor', 'Microfones', 'Videoconferência'], status: 'disponivel' },
   { id: 4, nome: 'Sala Cedro', andar: '2º andar', capacidade: 4, recursos: ['TV 42"', 'Quadro branco'], status: 'disponivel' },
   { id: 5, nome: 'Sala Safira', andar: '3º andar', capacidade: 6, recursos: ['Projetor', 'Ar-condicionado'], status: 'manutencao' },
-  { id: 6, nome: 'Auditório Nex', andar: 'Térreo', capacidade: 60, recursos: ['Palco', 'Microfones', 'Projetor', 'Videoconferência'], status: 'ocupada' },
+  { id: 6, nome: 'Auditório Nex', andar: 'Térreo', capacidade: 60, executiva: true, recursos: ['Palco', 'Microfones', 'Projetor', 'Videoconferência'], status: 'ocupada' },
 ]
 
 export const proximasReservas = [
