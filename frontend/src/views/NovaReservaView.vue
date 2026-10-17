@@ -3,6 +3,7 @@ import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import DateField from '../components/DateField.vue'
 import TimeField from '../components/TimeField.vue'
+import SelectField from '../components/SelectField.vue'
 import { reservasService, salasService } from '../services'
 import { validarReserva, HORARIO_COMERCIAL } from '../services/reservas'
 import { formatarData } from '../services/mockData'
@@ -41,6 +42,14 @@ onMounted(async () => {
   ;[salas.value, reservas.value] = await Promise.all([salasService.listar(), reservasService.listar()])
 })
 
+const opcoesSala = computed(() =>
+  salas.value.map((s) => ({
+    value: s.id,
+    label: s.nome,
+    descricao: s.status === 'manutencao' ? 'Em manutenção' : `${s.andar} · até ${s.capacidade} pessoas${s.executiva ? ' · executiva' : ''}`,
+    disabled: s.status === 'manutencao',
+  })),
+)
 const salaSelecionada = computed(() => salas.value.find((s) => s.id === Number(form.salaId)))
 
 function validar() {
@@ -48,12 +57,7 @@ function validar() {
 }
 
 // Validação inline: depois da primeira tentativa de envio, revalida a cada alteração.
-function aoAlterar() {
-  if (enviado.value) validar()
-}
-
-// Os seletores personalizados emitem update:modelValue; revalida quando mudam.
-watch(() => [form.data, form.inicio, form.fim], aoAlterar)
+watch(form, () => enviado.value && validar())
 
 async function enviar() {
   enviado.value = true
@@ -72,64 +76,60 @@ async function enviar() {
 }
 
 const campo =
-  'w-full rounded-lg border bg-panel px-4 py-2.5 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-secondary/30'
+  'w-full rounded-lg border bg-body px-4 py-2.5 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-secondary/30'
 const borda = (k) => (erros.value[k] ? 'border-alert' : 'border-line focus:border-secondary')
+const rotulo = 'block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide'
 </script>
 
 <template>
-  <section class="max-w-2xl">
-    <h1 class="text-2xl font-bold font-[family-name:var(--font-heading)] text-fg">Nova reserva</h1>
-    <p class="text-sm text-muted mb-2">Reserve uma sala para a sua reunião.</p>
-    <p class="text-xs text-muted mb-6">Dados de demonstração — a reserva é simulada e some ao recarregar a página.</p>
+  <section>
+    <div class="flex items-center gap-3 mb-1">
+      <h1 class="text-2xl font-bold font-[family-name:var(--font-heading)] text-fg">Nova reserva</h1>
+      <span class="text-[11px] font-medium rounded-full px-2 py-0.5 bg-accent-soft text-accent" title="A reserva é simulada e some ao recarregar a página">Demonstração</span>
+    </div>
+    <p class="text-sm text-muted mb-8">Reserve uma sala para a sua reunião.</p>
 
-    <form class="bg-hover border border-line rounded-xl p-6 space-y-5" novalidate @submit.prevent="enviar">
-      <p v-if="erros.geral" class="text-sm text-alert" role="alert">{{ erros.geral }}</p>
+    <form class="grid grid-cols-1 lg:grid-cols-12 gap-x-6 gap-y-5" novalidate @submit.prevent="enviar">
+      <p v-if="erros.geral" class="lg:col-span-12 text-sm text-alert" role="alert">{{ erros.geral }}</p>
 
-      <div>
-        <label for="titulo" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Motivo da reunião</label>
-        <input id="titulo" v-model="form.titulo" type="text" :class="[campo, borda('titulo')]" placeholder="Ex.: Planejamento semanal" @input="aoAlterar" />
+      <div class="lg:col-span-8">
+        <label for="titulo" :class="rotulo">Motivo da reunião</label>
+        <input id="titulo" v-model="form.titulo" type="text" :class="[campo, borda('titulo')]" placeholder="Ex.: Planejamento semanal" />
         <p v-if="erros.titulo" data-testid="erro-titulo" class="text-xs text-alert mt-1">{{ erros.titulo }}</p>
       </div>
 
-      <div>
-        <label for="sala" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Sala</label>
-        <select id="sala" v-model="form.salaId" :class="[campo, borda('salaId')]" @change="aoAlterar">
-          <option value="">Selecione uma sala</option>
-          <option v-for="s in salas" :key="s.id" :value="s.id" :disabled="s.status === 'manutencao'">
-            {{ s.nome }} — até {{ s.capacidade }} pessoas{{ s.status === 'manutencao' ? ' (em manutenção)' : '' }}
-          </option>
-        </select>
+      <div class="lg:col-span-4">
+        <label for="sala" :class="rotulo">Sala</label>
+        <SelectField id="sala" v-model="form.salaId" :options="opcoesSala" placeholder="Selecione uma sala" :invalid="!!erros.salaId" />
         <p v-if="erros.salaId" data-testid="erro-salaId" class="text-xs text-alert mt-1">{{ erros.salaId }}</p>
-        <p v-else-if="salaSelecionada?.executiva" class="text-xs text-muted mt-1">
-          Sala executiva: a reserva ficará pendente até a aprovação de um Coordenador.
-        </p>
+        <p v-else-if="salaSelecionada?.executiva" class="text-xs text-muted mt-1">Sala executiva: a reserva ficará pendente até a aprovação de um Coordenador.</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label for="data" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Data</label>
-          <DateField id="data" v-model="form.data" :min="hoje" :invalid="!!erros.data" />
-          <p v-if="erros.data" data-testid="erro-data" class="text-xs text-alert mt-1">{{ erros.data }}</p>
-        </div>
-        <div>
-          <label for="inicio" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Início</label>
-          <TimeField id="inicio" v-model="form.inicio" :de="HORARIO_COMERCIAL.inicio" :ate="inicioAte" :invalid="!!erros.inicio" />
-        </div>
-        <div>
-          <label for="fim" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Término</label>
-          <TimeField id="fim" v-model="form.fim" :de="fimDe" :ate="HORARIO_COMERCIAL.fim" :invalid="!!erros.fim" />
-        </div>
+      <div class="lg:col-span-3">
+        <label for="data" :class="rotulo">Data</label>
+        <DateField id="data" v-model="form.data" :min="hoje" :invalid="!!erros.data" />
+        <p v-if="erros.data" data-testid="erro-data" class="text-xs text-alert mt-1">{{ erros.data }}</p>
       </div>
-      <p v-if="erros.inicio" data-testid="erro-inicio" class="text-xs text-alert -mt-3">{{ erros.inicio }}</p>
-      <p v-if="erros.fim" data-testid="erro-fim" class="text-xs text-alert -mt-3">{{ erros.fim }}</p>
 
-      <div>
-        <label for="participantes" class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">Participantes</label>
-        <input id="participantes" v-model="form.participantes" type="number" min="1" :class="[campo, borda('participantes')]" placeholder="Quantidade de pessoas" @input="aoAlterar" />
+      <div class="lg:col-span-3">
+        <label for="inicio" :class="rotulo">Início</label>
+        <TimeField id="inicio" v-model="form.inicio" :de="HORARIO_COMERCIAL.inicio" :ate="inicioAte" :invalid="!!erros.inicio" />
+        <p v-if="erros.inicio" data-testid="erro-inicio" class="text-xs text-alert mt-1">{{ erros.inicio }}</p>
+      </div>
+
+      <div class="lg:col-span-3">
+        <label for="fim" :class="rotulo">Término</label>
+        <TimeField id="fim" v-model="form.fim" :de="fimDe" :ate="HORARIO_COMERCIAL.fim" :invalid="!!erros.fim" />
+        <p v-if="erros.fim" data-testid="erro-fim" class="text-xs text-alert mt-1">{{ erros.fim }}</p>
+      </div>
+
+      <div class="lg:col-span-3">
+        <label for="participantes" :class="rotulo">Participantes</label>
+        <input id="participantes" v-model="form.participantes" type="number" min="1" :class="[campo, borda('participantes')]" placeholder="Quantidade de pessoas" />
         <p v-if="erros.participantes" data-testid="erro-participantes" class="text-xs text-alert mt-1">{{ erros.participantes }}</p>
       </div>
 
-      <div class="flex items-center justify-end gap-3 pt-2">
+      <div class="lg:col-span-12 flex items-center justify-end gap-3 pt-5 mt-2 border-t border-line">
         <RouterLink to="/calendario" class="text-sm font-medium text-muted hover:text-fg px-4 py-2.5">Cancelar</RouterLink>
         <button type="submit" :disabled="salvando" class="bg-primary hover:bg-primary/90 disabled:opacity-70 text-white text-sm font-semibold rounded-lg px-5 py-2.5 transition-all">
           {{ salvando ? 'Reservando...' : 'Reservar sala' }}

@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import NovaReservaView from './NovaReservaView.vue'
 import DateField from '../components/DateField.vue'
 import TimeField from '../components/TimeField.vue'
+import SelectField from '../components/SelectField.vue'
 import { reservasService } from '../services'
 import { formatarData } from '../services/mockData'
 import { useAuthStore } from '../stores/auth'
@@ -32,7 +33,7 @@ async function montar() {
 
 async function preencher(w, v) {
   if (v.titulo !== undefined) await w.find('#titulo').setValue(v.titulo)
-  if (v.sala !== undefined) await w.find('#sala').setValue(String(v.sala))
+  if (v.sala !== undefined) await w.findComponent(SelectField).setValue(v.sala)
   if (v.data !== undefined) await w.findComponent(DateField).setValue(v.data)
   if (v.inicio !== undefined) await w.findAllComponents(TimeField)[0].setValue(v.inicio)
   if (v.fim !== undefined) await w.findAllComponents(TimeField)[1].setValue(v.fim)
@@ -99,9 +100,11 @@ describe('NovaReservaView', () => {
     expect(criada.status).toBe('pendente')
   })
 
-  it('sala em manutenção não pode ser escolhida', async () => {
+  it('sala em manutenção aparece desabilitada na lista', async () => {
     const w = await montar()
-    const opcao = w.findAll('#sala option').find((o) => o.text().includes('Safira'))
-    expect(opcao.attributes('disabled')).toBeDefined()
+    await w.find('button#sala').trigger('click')
+    const opcao = w.findAll('[data-testid="select-opcao"]').find((o) => o.text().includes('Safira'))
+    expect(opcao.attributes('aria-disabled')).toBe('true')
+    expect(opcao.text()).toContain('Em manutenção')
   })
 })

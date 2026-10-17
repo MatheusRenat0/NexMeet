@@ -52,7 +52,7 @@ onBeforeUnmount(() => document.removeEventListener('click', fora))
     <button
       :id="id"
       type="button"
-      class="w-full flex items-center justify-between gap-2 rounded-lg border bg-panel px-4 py-2.5 text-sm text-left focus:outline-none focus:ring-2 focus:ring-secondary/30"
+      class="w-full flex items-center justify-between gap-2 rounded-lg border bg-body px-4 py-2.5 text-sm text-left focus:outline-none focus:ring-2 focus:ring-secondary/30"
       :class="invalid ? 'border-alert' : 'border-line focus:border-secondary'"
       aria-haspopup="listbox"
       :aria-expanded="aberto"
