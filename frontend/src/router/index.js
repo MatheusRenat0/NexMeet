@@ -7,6 +7,7 @@ import SalasView from '../views/SalasView.vue'
 import CalendarioView from '../views/CalendarioView.vue'
 import NovaReservaView from '../views/NovaReservaView.vue'
 import UsuariosView from '../views/UsuariosView.vue'
+import NovoUsuarioView from '../views/NovoUsuarioView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -22,6 +23,7 @@ const router = createRouter({
         { path: 'reservas/nova', name: 'nova-reserva', component: NovaReservaView },
         { path: 'salas', name: 'salas', component: SalasView },
         { path: 'usuarios', name: 'usuarios', component: UsuariosView },
+        { path: 'usuarios/novo', name: 'novo-usuario', component: NovoUsuarioView },
       ],
     },
   ],

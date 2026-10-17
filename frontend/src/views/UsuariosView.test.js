@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount, flushPromises, RouterLinkStub } from '@vue/test-utils'
 import UsuariosView from './UsuariosView.vue'
 
 async function montar() {
-  const w = mount(UsuariosView, { attachTo: document.body })
+  const w = mount(UsuariosView, { attachTo: document.body, global: { stubs: { RouterLink: RouterLinkStub } } })
   await flushPromises()
   return w
 }
@@ -11,6 +11,12 @@ async function montar() {
 const linhas = (w) => w.findAll('[data-testid="usuario"]')
 
 describe('UsuariosView', () => {
+  it('tem o botão Novo usuário apontando para o cadastro', async () => {
+    const w = await montar()
+    expect(w.findComponent(RouterLinkStub).props('to')).toBe('/usuarios/novo')
+    expect(w.find('[data-testid="novo-usuario"]').text()).toBe('Novo usuário')
+  })
+
   it('lista a primeira página com 5 usuários e o resumo', async () => {
     const w = await montar()
     expect(linhas(w)).toHaveLength(5)

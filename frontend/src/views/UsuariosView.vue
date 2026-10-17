@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { usuariosService } from '../services'
 import { PERFIS } from '../services/mockUsuarios'
 
@@ -58,7 +59,16 @@ const entrada =
 
 <template>
   <section>
-    <h1 class="text-2xl font-bold font-[family-name:var(--font-heading)] text-fg">Usuários</h1>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-1">
+      <h1 class="text-2xl font-bold font-[family-name:var(--font-heading)] text-fg">Usuários</h1>
+      <RouterLink
+        to="/usuarios/novo"
+        data-testid="novo-usuario"
+        class="bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-lg px-4 py-2 transition-all"
+      >
+        Novo usuário
+      </RouterLink>
+    </div>
     <p class="text-sm text-muted mb-2">Gerencie quem tem acesso ao NexMeet.</p>
     <p class="text-xs text-muted mb-4">Dados de demonstração — a integração com a API vem nas próximas fases.</p>
 
