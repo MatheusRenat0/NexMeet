@@ -2,6 +2,9 @@ import { PERFIS } from './mockUsuarios'
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+// Tamanho mínimo provisório: a política de senha oficial ainda não foi definida.
+export const SENHA_MINIMA = 8
+
 /**
  * Validação de UX no cliente (RF-06, RN-10). A regra oficial vem do backend (N-01).
  * @returns {Object} mapa campo -> mensagem; vazio quando válido
@@ -20,6 +23,12 @@ export function validarUsuario(dados, { usuarios }) {
 
   if (!dados.perfil) erros.perfil = 'Selecione um perfil.'
   else if (!PERFIS.includes(dados.perfil)) erros.perfil = 'Perfil inválido.'
+
+  const senha = dados.senha || ''
+  if (!senha) erros.senha = 'Defina uma senha temporária.'
+  else if (senha.length < SENHA_MINIMA) erros.senha = `A senha deve ter ao menos ${SENHA_MINIMA} caracteres.`
+
+  if (!erros.senha && dados.confirmarSenha !== senha) erros.confirmarSenha = 'As senhas não conferem.'
 
   return erros
 }

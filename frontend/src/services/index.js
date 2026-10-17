@@ -48,8 +48,10 @@ export const usuariosService = {
   listar: () => resolver(usuarios),
 
   /**
-   * Cadastra um usuário (RF-06), ativo, sem senha: o acesso será liberado por convite
-   * por e-mail quando o backend existir. Rejeita com `{ erros }` se inválido.
+   * Cadastra um usuário (RF-06), ativo, com senha temporária. A senha NÃO é guardada no
+   * mock; quando o backend existir, o payload { nome, email, perfil, senha } segue para
+   * a API, que grava o hash e marca o primeiro acesso para troca obrigatória de senha.
+   * Rejeita com `{ erros }` se inválido.
    */
   criar(dados) {
     const erros = validarUsuario(dados, { usuarios })
@@ -60,6 +62,7 @@ export const usuariosService = {
       email: dados.email.trim().toLowerCase(),
       perfil: dados.perfil,
       ativo: true,
+      trocarSenhaNoPrimeiroAcesso: true,
     }
     usuarios.push(novo)
     return resolver(novo)
